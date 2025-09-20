@@ -95,9 +95,8 @@
           ev.preventDefault();
           showCart = true;
           history.pushState({}, '', '/cart.html');
-          // Render immediately with current cart items to avoid UI lag/race conditions
+          // Render immediately with current cart items, then refresh asynchronously
           render();
-          // Then fetch latest cart and re-render once data arrives
           fetchCart();
         };
         a.textContent = 'Cart';

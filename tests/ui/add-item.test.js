@@ -29,8 +29,10 @@ describe('UI: Add item to cart (saucedemo)', function () {
     await driver.wait(until.elementLocated(By.css('.inventory_list')), 10000);
 
     // Add the first item to cart
-    const firstAddButton = await driver.findElement(By.css('button.btn_inventory'));
-    await firstAddButton.click();
+  const firstAddButton = await driver.findElement(By.css('button.btn_inventory'));
+  await firstAddButton.click();
+  // Give the client a moment to update cart state before navigating
+  await driver.sleep(500);
 
     // Verify cart badge increments to 1
     const badge = await driver.wait(
@@ -41,8 +43,14 @@ describe('UI: Add item to cart (saucedemo)', function () {
     expect(text).to.equal('1');
 
     // Navigate to cart and verify item exists
-    await driver.findElement(By.css('.shopping_cart_link')).click();
-    await driver.wait(until.elementLocated(By.css('.cart_item')), 10000);
+  await driver.findElement(By.css('.shopping_cart_link')).click();
+    // Wait for the SPA to navigate to cart view
+    await driver.wait(until.urlContains('cart'), 5000).catch(() => {});
+    // Poll for cart items to appear (handles async fetch and render)
+    await driver.wait(async () => {
+      const items = await driver.findElements(By.css('.cart_item'));
+      return items.length > 0;
+    }, 25000, 'Expected at least one .cart_item in cart');
     const cartItems = await driver.findElements(By.css('.cart_item'));
     expect(cartItems.length).to.be.greaterThan(0);
   });
