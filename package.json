@@ -32,7 +32,7 @@
     "selenium-webdriver": "^4.35.0"
   },
   "devDependencies": {
-    "chai": "^6.0.1",
+    "chai": "^4.3.10",
     "mocha": "^11.7.2",
     "newman": "^6.2.1",
     "start-server-and-test": "^2.1.2"
