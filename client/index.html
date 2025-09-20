@@ -62,6 +62,10 @@
       async function addToCart(id) {
         await fetch('/api/cart', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username: 'standard_user', itemId: id })});
         await fetchCart();
+        // Navigate to cart view immediately after adding to reduce race conditions
+        showCart = true;
+        history.pushState({}, '', '/cart.html');
+        render();
       }
 
       function renderLogin(root) {

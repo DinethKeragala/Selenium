@@ -27,6 +27,11 @@ describe('UI: Add item to cart (saucedemo)', function () {
     await driver.findElement(By.id('login-button')).click();
 
     await driver.wait(until.elementLocated(By.css('.inventory_list')), 10000);
+    // Ensure at least one inventory item is rendered
+    await driver.wait(async () => {
+      const items = await driver.findElements(By.css('.inventory_item'));
+      return items.length > 0;
+    }, 10000, 'Expected inventory items to be rendered');
 
     // Add the first item to cart
   const firstAddButton = await driver.findElement(By.css('button.btn_inventory'));
