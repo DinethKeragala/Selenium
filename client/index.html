@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Saucedemo</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; }
+      .inventory_list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
+      .inventory_item { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; }
+      .shopping_cart_link { position: fixed; top: 16px; right: 16px; cursor: pointer; }
+      .shopping_cart_badge { background: #e11; color: #fff; border-radius: 50%; padding: 2px 8px; margin-left: 4px; }
+      .login { max-width: 320px; margin: 0 auto; }
+      input { display: block; width: 100%; margin: 8px 0; padding: 8px; }
+      button { padding: 8px 12px; cursor: pointer; }
+    </style>
+    <script>
+      let token = null;
+      let items = [];
+      let cartItems = [];
+      let showCart = false;
+
+      async function fetchItems() {
+        try {
+          const res = await fetch('/api/items');
+          items = await res.json();
+          render();
+        } catch {}
+      }
+
+      async function fetchCart() {
+        try {
+          const res = await fetch('/api/cart?username=standard_user');
+          const c = await res.json();
+          cartItems = c.items || [];
+          render();
+        } catch {}
+      }
+
+      async function onLogin(ev) {
+        ev.preventDefault();
+        const username = document.getElementById('user-name').value;
+        const password = document.getElementById('password').value;
+        const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username, password })});
+        if (res.ok) {
+          token = 'fake';
+          history.pushState({}, '', '/inventory.html');
+          showCart = false;
+          render();
+          fetchItems();
+          fetchCart();
+        } else {
+          alert('Login failed');
+        }
+      }
+
+      async function addToCart(id) {
+        await fetch('/api/cart', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username: 'standard_user', itemId: id })});
+        await fetchCart();
+      }
+
+      function renderLogin(root) {
+        const container = document.createElement('div');
+        container.className = 'login';
+        const h = document.createElement('h2');
+        h.textContent = 'Login';
+        const form = document.createElement('form');
+        form.onsubmit = onLogin;
+        const user = document.createElement('input');
+        user.id = 'user-name';
+        user.placeholder = 'Username';
+        const pass = document.createElement('input');
+        pass.id = 'password';
+        pass.type = 'password';
+        pass.placeholder = 'Password';
+        const btn = document.createElement('button');
+        btn.id = 'login-button';
+        btn.type = 'submit';
+        btn.textContent = 'Login';
+        form.append(user, pass, btn);
+        container.append(h, form);
+        root.append(container);
+      }
+
+      function renderCartLink(root) {
+        const a = document.createElement('a');
+        a.className = 'shopping_cart_link';
+        a.href = 'javascript:void(0)';
+        a.onclick = (ev) => {
+          ev.preventDefault();
+          showCart = true;
+          history.pushState({}, '', '/cart.html');
+          // Fetch latest cart and render after data is available
+          fetchCart();
+        };
+        a.textContent = 'Cart';
+        if (cartItems.length) {
+          const badge = document.createElement('span');
+          badge.className = 'shopping_cart_badge';
+          badge.textContent = String(cartItems.length);
+          a.appendChild(badge);
+        }
+        root.appendChild(a);
+      }
+
+      function renderInventory(root) {
+        const list = document.createElement('div');
+        list.className = 'inventory_list';
+        items.forEach((it) => {
+          const card = document.createElement('div');
+          card.className = 'inventory_item';
+          const n = document.createElement('div');
+          n.textContent = it.name;
+          const p = document.createElement('div');
+          p.textContent = `$${it.price}`;
+          const b = document.createElement('button');
+          b.className = 'btn_inventory';
+          b.textContent = 'Add to cart';
+          b.onclick = () => addToCart(it._id);
+          card.append(n, p, b);
+          list.appendChild(card);
+        });
+        root.appendChild(list);
+      }
+
+      function renderCart(root) {
+        const list = document.createElement('div');
+        list.className = 'cart_list';
+        cartItems.forEach((it) => {
+          const row = document.createElement('div');
+          row.className = 'cart_item';
+          const n = document.createElement('div');
+          n.textContent = it.name;
+          const p = document.createElement('div');
+          p.textContent = `$${it.price}`;
+          row.append(n, p);
+          list.appendChild(row);
+        });
+        root.appendChild(list);
+      }
+
+      function render() {
+        const root = document.getElementById('app');
+        root.innerHTML = '';
+        if (!token) {
+          renderLogin(root);
+          return;
+        }
+        renderCartLink(root);
+        if (showCart) {
+          renderCart(root);
+        } else {
+          // Render container immediately, then items fill in after fetch
+          const list = document.createElement('div');
+          list.className = 'inventory_list';
+          root.appendChild(list);
+          // If items already loaded, render them now; otherwise they will render after fetchItems
+          if (items.length) {
+            root.removeChild(list);
+            renderInventory(root);
+          }
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        render();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  </html>

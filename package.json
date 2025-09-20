@@ -1,0 +1,40 @@
+{
+  "name": "selenium",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test:all",
+    "build": "echo Build step placeholder",
+    "test:unit": "mocha \"tests/unit/**/*.test.js\" --reporter spec",
+    "test:ui": "mocha \"tests/ui/**/*.test.js\" --timeout 60000 --reporter spec",
+    "test:ui:local": "start-server-and-test start:server http-get://localhost:3000 test:ui",
+    "test:api": "newman run tests/api/collection.postman_collection.json --reporters cli",
+    "test:all": "npm run test:unit && npm run test:ui && npm run test:api",
+    "start:server": "npm --prefix server run start",
+    "install:server": "npm --prefix server install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DinethKeragala/Selenium.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DinethKeragala/Selenium/issues"
+  },
+  "homepage": "https://github.com/DinethKeragala/Selenium#readme",
+  "dependencies": {
+    "chromedriver": "^140.0.3",
+    "dotenv": "^17.2.2",
+    "selenium-webdriver": "^4.35.0"
+  },
+  "devDependencies": {
+    "chai": "^6.0.1",
+    "mocha": "^11.7.2",
+    "newman": "^6.2.1",
+    "start-server-and-test": "^2.1.2"
+  }
+}

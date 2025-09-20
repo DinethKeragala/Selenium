@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "Postman Echo API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Echo Query - Success",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://postman-echo.com/get?foo=bar",
+          "protocol": "https",
+          "host": ["postman-echo", "com"],
+          "path": ["get"],
+          "query": [{ "key": "foo", "value": "bar" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response echoes query param\", function () { const json = pm.response.json(); pm.expect(json).to.have.property('args'); pm.expect(json.args).to.have.property('foo', 'bar'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET 404 - Not Found",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://postman-echo.com/status/404",
+          "protocol": "https",
+          "host": ["postman-echo", "com"],
+          "path": ["status", "404"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"Has Content-Type header\", function () { pm.expect(pm.response.headers.has('Content-Type')).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
